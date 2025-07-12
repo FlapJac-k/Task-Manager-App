@@ -27,13 +27,15 @@ class UpdateTaskRequest extends FormRequest
             return [
                 'title' => 'sometimes|required|string|max:255',
                 'description' => 'sometimes|nullable|string',
-                'status' => 'sometimes|required|in:pending,in-progress,completed',
+                'status' => 'sometimes|required|in:pending,inprogress,completed,canceled',
                 'assigned_to' => 'sometimes|exists:users,id',
+                'depends_on' => 'nullable|array',
+                'depends_on.*' => 'exists:tasks,id|distinct',
             ];
         }
 
         return [
-            'status' => 'required|in:pending,inprogress,completed',
+            'status' => 'required|in:pending,inprogress,completed,canceled',
         ];
     }
 }

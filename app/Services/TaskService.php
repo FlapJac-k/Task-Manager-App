@@ -14,34 +14,83 @@ class TaskService
 
     public function getVisibleTasks(User $user): Collection
     {
-        if ($user->hasRole('manager')) {
-            return $this->taskRepository->getAll();
+        return $user->hasRole('manager')
+            ? $this->taskRepository->getAll()
+            : $this->taskRepository->getByAssignedUser($user->id);
+    }
+
+    public function createTask(array $data): Task
+    {
+        $dependencies = $data['depends_on'] ?? [];
+        unset($data['depends_on']);
+
+        $task = $this->taskRepository->create($data);
+
+        if (!empty($dependencies)) {
+            $this->syncDependencies($task, $dependencies);
         }
 
-        return $this->taskRepository->getByAssignedUser($user->id);
+        return $task;
     }
 
     public function updateTask(Task $task, array $data, User $user): Task
     {
-        //TODO:: Use Enum For Task status
-        if ($task->dependencies()->where('status', '!=', 'completed')->exists()) {
-            throw ValidationException::withMessages([
-                'status' => ['Cannot complete task until all dependencies are completed.'],
-            ]);
-        }
+        $this->validateCompletionRules($task, $data);
 
         if ($user->hasRole('manager')) {
-            return $this->taskRepository->update($task, $data);
+
+            $dependencies = $data['depends_on'] ?? null;
+
+            unset($data['depends_on']);
+
+            $this->taskRepository->update($task, $data);
+
+            if ($dependencies !== null) {
+                $this->syncDependencies($task, $dependencies);
+            }
+
+            return $task;
         }
 
         if ($user->hasRole('user') && $task->assigned_to === $user->id) {
+            if (!isset($data['status'])) {
+                throw ValidationException::withMessages([
+                    'status' => ['You can only update the task status.']
+                ]);
+            }
+
             return $this->taskRepository->update($task, [
-                'status' => $data['status']
+                'status' => $data['status'],
             ]);
         }
 
         throw ValidationException::withMessages([
             'permission' => ['You are not authorized to update this task.']
         ]);
+    }
+
+    private function syncDependencies(Task $task, array $dependencies): void
+    {
+        if (in_array($task->id, $dependencies)) {
+            throw ValidationException::withMessages([
+                'depends_on' => ['A task cannot depend on itself.']
+            ]);
+        }
+
+        $task->dependencies()->sync($dependencies);
+    }
+
+    private function validateCompletionRules(Task $task, array $data): void
+    {
+        //TODO:: Use Enum For Task status
+        if (
+            isset($data['status']) &&
+            $data['status'] === 'completed' &&
+            $task->dependencies()->where('status', '!=', 'completed')->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'status' => ['Cannot complete task until all dependencies are completed.']
+            ]);
+        }
     }
 }

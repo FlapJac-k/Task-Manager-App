@@ -13,5 +13,7 @@ interface TaskRepositoryInterface
 
     public function getByAssignedUser(int $userId): Collection;
 
+    public function create(array $data): Task;
+
     public function update(Task $task, array $data): Task;
 }

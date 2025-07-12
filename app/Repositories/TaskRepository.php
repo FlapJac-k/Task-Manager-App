@@ -19,6 +19,11 @@ class TaskRepository implements TaskRepositoryInterface
         return Task::where('assigned_to', $userId)->get();
     }
 
+    public function create(array $data): Task
+    {
+        return Task::create($data);
+    }
+
     public function update(Task $task, array $data): Task
     {
         $task->update($data);

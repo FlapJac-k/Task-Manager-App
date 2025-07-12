@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use App\Services\TaskService;
@@ -22,14 +23,9 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'description' => 'nullable|string',
-        ]);
-
-        $task = Task::create($request->only(['title', 'description', 'assigned_to']));
+        $task = $this->taskService->createTask($request->validated());
         return response()->json($task, 201);
     }
 
@@ -38,6 +34,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
+        $task->load(['dependencies', 'dependents']);
         return response()->json($task);
     }
 
