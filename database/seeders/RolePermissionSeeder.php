@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
                 'create task',
                 'edit task',
                 'view tasks',
+                'delete tasks',
             ];
 
             $roleModels = [];
@@ -39,10 +40,13 @@ class RolePermissionSeeder extends Seeder
 
             $roleModels['manager']->givePermissionTo([
                 $permissionModels['create task'],
+                $permissionModels['edit task'],
                 $permissionModels['view tasks'],
+                $permissionModels['delete tasks'],
             ]);
 
             $roleModels['user']->givePermissionTo([
+                $permissionModels['edit task'],
                 $permissionModels['view tasks'],
             ]);
 
@@ -59,7 +63,6 @@ class RolePermissionSeeder extends Seeder
                     $this->command->warn("User with email {$email} not found. Role not assigned.");
                 }
             }
-
         }
     }
 }
