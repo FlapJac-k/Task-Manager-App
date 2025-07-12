@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class TaskController extends Controller
     {
         $user = $request->user();
 
-        return $this->taskService->getVisibleTasks($user);
+        return TaskResource::collection($this->taskService->getVisibleTasks($user));
     }
 
     /**
@@ -29,7 +30,7 @@ class TaskController extends Controller
     {
         $task = $this->taskService->createTask($request->validated());
 
-        return response()->json($task, 201);
+        return (new TaskResource($task))->response()->setStatusCode(201);
     }
 
     /**
@@ -39,7 +40,7 @@ class TaskController extends Controller
     {
         $task = $this->taskService->getTaskWithDependencies($taskId);
 
-        return response()->json($task);
+        return new TaskResource($task);
     }
 
     /**
@@ -50,7 +51,7 @@ class TaskController extends Controller
         // TODO:: Use DTO
         $updatedTask = $this->taskService->updateTask($task, $request->validated(), $request->user());
 
-        return response()->json($updatedTask);
+        return new TaskResource($updatedTask);
     }
 
     /**
