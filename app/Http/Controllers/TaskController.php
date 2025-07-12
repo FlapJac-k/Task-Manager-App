@@ -11,12 +11,14 @@ use Illuminate\Http\Request;
 class TaskController extends Controller
 {
     public function __construct(private readonly TaskService $taskService) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $user = $request->user();
+
         return $this->taskService->getVisibleTasks($user);
     }
 
@@ -26,6 +28,7 @@ class TaskController extends Controller
     public function store(StoreTaskRequest $request)
     {
         $task = $this->taskService->createTask($request->validated());
+
         return response()->json($task, 201);
     }
 

@@ -7,61 +7,60 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-
 class RolePermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
-    { {
-            if (Role::where('name', 'manager')->exists()) {
-                return;
-            }
+    {
+        if (Role::where('name', 'manager')->exists()) {
+            return;
+        }
 
-            $roles = ['manager', 'user'];
-            $permissions = [
-                'create task',
-                'edit task',
-                'view tasks',
-                'delete tasks',
-            ];
+        $roles = ['manager', 'user'];
+        $permissions = [
+            'create task',
+            'edit task',
+            'view tasks',
+            'delete tasks',
+        ];
 
-            $roleModels = [];
-            foreach ($roles as $roleName) {
-                $roleModels[$roleName] = Role::create(['name' => $roleName]);
-            }
+        $roleModels = [];
+        foreach ($roles as $roleName) {
+            $roleModels[$roleName] = Role::create(['name' => $roleName]);
+        }
 
-            $permissionModels = [];
-            foreach ($permissions as $permissionName) {
-                $permissionModels[$permissionName] = Permission::create(['name' => $permissionName]);
-            }
+        $permissionModels = [];
+        foreach ($permissions as $permissionName) {
+            $permissionModels[$permissionName] = Permission::create(['name' => $permissionName]);
+        }
 
-            $roleModels['manager']->givePermissionTo([
-                $permissionModels['create task'],
-                $permissionModels['edit task'],
-                $permissionModels['view tasks'],
-                $permissionModels['delete tasks'],
-            ]);
+        $roleModels['manager']->givePermissionTo([
+            $permissionModels['create task'],
+            $permissionModels['edit task'],
+            $permissionModels['view tasks'],
+            $permissionModels['delete tasks'],
+        ]);
 
-            $roleModels['user']->givePermissionTo([
-                $permissionModels['edit task'],
-                $permissionModels['view tasks'],
-            ]);
+        $roleModels['user']->givePermissionTo([
+            $permissionModels['edit task'],
+            $permissionModels['view tasks'],
+        ]);
 
-            $users = [
-                'manager@example.com' => 'manager',
-                'user@example.com' => 'user',
-            ];
+        $users = [
+            'manager@example.com' => 'manager',
+            'user@example.com' => 'user',
+        ];
 
-            foreach ($users as $email => $roleName) {
-                $user = User::where('email', $email)->first();
-                if ($user) {
-                    $user->assignRole($roleName);
-                } else {
-                    $this->command->warn("User with email {$email} not found. Role not assigned.");
-                }
+        foreach ($users as $email => $roleName) {
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                $user->assignRole($roleName);
+            } else {
+                $this->command->warn("User with email {$email} not found. Role not assigned.");
             }
         }
+
     }
 }
