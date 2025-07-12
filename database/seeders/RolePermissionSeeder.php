@@ -16,7 +16,6 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     { {
             if (Role::where('name', 'manager')->exists()) {
-                $this->command->info('Roles and permissions already seeded. Skipping.');
                 return;
             }
 
