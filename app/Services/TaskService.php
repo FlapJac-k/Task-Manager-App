@@ -19,6 +19,11 @@ class TaskService
             : $this->taskRepository->getByAssignedUser($user->id);
     }
 
+    public function getTaskWithDependencies(int $taskId): Task
+    {
+        return $this->taskRepository->findWithDependencies($taskId);
+    }
+
     public function createTask(array $data): Task
     {
         $dependencies = $data['depends_on'] ?? [];
@@ -26,7 +31,7 @@ class TaskService
 
         $task = $this->taskRepository->create($data);
 
-        if (!empty($dependencies)) {
+        if (! empty($dependencies)) {
             $this->syncDependencies($task, $dependencies);
         }
 
@@ -53,9 +58,9 @@ class TaskService
         }
 
         if ($user->hasRole('user') && $task->assigned_to === $user->id) {
-            if (!isset($data['status'])) {
+            if (! isset($data['status'])) {
                 throw ValidationException::withMessages([
-                    'status' => ['You can only update the task status.']
+                    'status' => ['You can only update the task status.'],
                 ]);
             }
 
@@ -65,15 +70,27 @@ class TaskService
         }
 
         throw ValidationException::withMessages([
-            'permission' => ['You are not authorized to update this task.']
+            'permission' => ['You are not authorized to update this task.'],
         ]);
+    }
+
+    public function deleteTask(Task $task): void
+    {
+
+        if ($task->dependents()->exists()) {
+            throw ValidationException::withMessages([
+                'task' => ['Cannot delete task because other tasks depend on it.'],
+            ]);
+        }
+
+        $this->taskRepository->delete($task);
     }
 
     private function syncDependencies(Task $task, array $dependencies): void
     {
         if (in_array($task->id, $dependencies)) {
             throw ValidationException::withMessages([
-                'depends_on' => ['A task cannot depend on itself.']
+                'depends_on' => ['A task cannot depend on itself.'],
             ]);
         }
 
@@ -82,14 +99,14 @@ class TaskService
 
     private function validateCompletionRules(Task $task, array $data): void
     {
-        //TODO:: Use Enum For Task status
+        // TODO:: Use Enum For Task status
         if (
             isset($data['status']) &&
             $data['status'] === 'completed' &&
             $task->dependencies()->where('status', '!=', 'completed')->exists()
         ) {
             throw ValidationException::withMessages([
-                'status' => ['Cannot complete task until all dependencies are completed.']
+                'status' => ['Cannot complete task until all dependencies are completed.'],
             ]);
         }
     }

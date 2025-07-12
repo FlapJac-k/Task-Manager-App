@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 
 class TaskRepository implements TaskRepositoryInterface
 {
-
     public function getAll(): Collection
     {
         return Task::all();
@@ -19,6 +18,11 @@ class TaskRepository implements TaskRepositoryInterface
         return Task::where('assigned_to', $userId)->get();
     }
 
+    public function findWithDependencies(int $taskId): Task
+    {
+        return Task::with('dependencies')->findOrFail($taskId);
+    }
+
     public function create(array $data): Task
     {
         return Task::create($data);
@@ -27,6 +31,12 @@ class TaskRepository implements TaskRepositoryInterface
     public function update(Task $task, array $data): Task
     {
         $task->update($data);
+
         return $task;
+    }
+
+    public function delete(Task $task): void
+    {
+        $task->delete();
     }
 }

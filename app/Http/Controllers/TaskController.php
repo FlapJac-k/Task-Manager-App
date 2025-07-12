@@ -32,9 +32,10 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(int $taskId)
     {
-        $task->load(['dependencies', 'dependents']);
+        $task = $this->taskService->getTaskWithDependencies($taskId);
+
         return response()->json($task);
     }
 
@@ -43,8 +44,9 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        //TODO:: Use DTO
+        // TODO:: Use DTO
         $updatedTask = $this->taskService->updateTask($task, $request->validated(), $request->user());
+
         return response()->json($updatedTask);
     }
 
@@ -53,7 +55,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $task->delete();
-        return response()->json(null, 204);
+        $this->taskService->deleteTask($task);
+
+        return response()->json(['message' => 'Task deleted successfully'], 204);
     }
 }
