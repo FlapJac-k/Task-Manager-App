@@ -32,7 +32,7 @@ class TaskService
         ]);
 
         if (! empty($dto->depends_on)) {
-            $this->syncDependencies($task, $dto->depends_on);
+            $this->syncDependencies($task, $dto->depends_on, false);
         }
 
         return $task;
@@ -92,12 +92,23 @@ class TaskService
         $this->taskRepository->delete($task);
     }
 
-    private function syncDependencies(Task $task, array $dependencies): void
+    private function syncDependencies(Task $task, array $dependencies, bool $checkCircular = true): void
     {
+
         if (in_array($task->id, $dependencies)) {
             throw ValidationException::withMessages([
                 'depends_on' => ['A task cannot depend on itself.'],
             ]);
+        }
+
+        if ($checkCircular) {
+            foreach ($dependencies as $depId) {
+                if ($this->hasCircularDependency($task->id, $depId)) {
+                    throw ValidationException::withMessages([
+                        'depends_on' => ["Task $depId indirectly depends on Task {$task->id}."],
+                    ]);
+                }
+            }
         }
 
         $task->dependencies()->sync($dependencies);
@@ -113,5 +124,26 @@ class TaskService
                 'status' => ['Cannot complete task until all dependencies are completed.'],
             ]);
         }
+    }
+
+    private function hasCircularDependency(int $targetTaskId, int $currentId): bool
+    {
+        $task = Task::with('dependencies')->find($currentId);
+
+        if (! $task) {
+            return false;
+        }
+
+        foreach ($task->dependencies as $dependency) {
+            if ($dependency->id === $targetTaskId) {
+                return true;
+            }
+
+            if ($this->hasCircularDependency($targetTaskId, $dependency->id)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
