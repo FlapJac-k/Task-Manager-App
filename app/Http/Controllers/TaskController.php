@@ -61,6 +61,6 @@ class TaskController extends Controller
     {
         $this->taskService->deleteTask($task);
 
-        return response()->json(['message' => 'Task deleted successfully'], 204);
+        return response()->json(['message' => 'Task deleted successfully'], 200);
     }
 }
