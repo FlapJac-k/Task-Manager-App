@@ -15,7 +15,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('tasks', [TaskController::class, 'Index'])
         ->middleware('permission:view tasks');
 
-    Route::put('tasks', [TaskController::class, 'update'])
+    Route::put('tasks/{task}', [TaskController::class, 'update'])
         ->middleware('permission:edit tasks');
 
     Route::post('tasks', [TaskController::class, 'store'])

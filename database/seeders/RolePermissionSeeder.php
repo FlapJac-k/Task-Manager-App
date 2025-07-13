@@ -20,8 +20,8 @@ class RolePermissionSeeder extends Seeder
 
         $roles = ['manager', 'user'];
         $permissions = [
-            'create task',
-            'edit task',
+            'create tasks',
+            'edit tasks',
             'view tasks',
             'delete tasks',
         ];
@@ -37,14 +37,14 @@ class RolePermissionSeeder extends Seeder
         }
 
         $roleModels['manager']->givePermissionTo([
-            $permissionModels['create task'],
-            $permissionModels['edit task'],
+            $permissionModels['create tasks'],
+            $permissionModels['edit tasks'],
             $permissionModels['view tasks'],
             $permissionModels['delete tasks'],
         ]);
 
         $roleModels['user']->givePermissionTo([
-            $permissionModels['edit task'],
+            $permissionModels['edit tasks'],
             $permissionModels['view tasks'],
         ]);
 
