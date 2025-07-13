@@ -56,7 +56,7 @@ class TaskService
 
             $this->taskRepository->update($task, $updateData);
 
-            if ($dto->depends_on != UpdateTaskDTO::UNDEFINED && ! empty($dto->depends_on)) {
+            if ($dto->depends_on != UpdateTaskDTO::UNDEFINED) {
                 $this->syncDependencies($task, $dto->depends_on);
             }
 
