@@ -29,5 +29,14 @@ class UserSeeder extends Seeder
                 'password' => bcrypt('password'),
             ]);
         }
+
+        $user2 = User::where('email', 'user2@example.com')->first();
+        if (! $user2) {
+            $user2 = User::create([
+                'name' => 'User2',
+                'email' => 'user2@example.com',
+                'password' => bcrypt('password'),
+            ]);
+        }
     }
 }
