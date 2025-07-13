@@ -28,7 +28,7 @@ class UpdateTaskRequest extends FormRequest
 
         if ($user->hasRole('manager')) {
             return [
-                'title' => 'sometimes|required|string|max:255',
+                'title' => 'sometimes|required|string|max:50',
                 'description' => 'sometimes|nullable|string',
                 'status' => ['sometimes', 'required', new Enum(TaskStatusEnum::class)],
                 'assigned_to' => 'sometimes|exists:users,id',
