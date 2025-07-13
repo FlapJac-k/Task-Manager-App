@@ -12,8 +12,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 
-    Route::apiResource('tasks', TaskController::class);
+    Route::get('tasks', [TaskController::class, 'Index'])
+        ->middleware('permission:view tasks');
+
+    Route::put('tasks', [TaskController::class, 'update'])
+        ->middleware('permission:edit tasks');
 
     Route::post('tasks', [TaskController::class, 'store'])
-        ->middleware('permission:create task');
+        ->middleware('permission:create tasks');
+
+    Route::post('tasks', [TaskController::class, 'destroy'])
+        ->middleware('permission:delete tasks');
 });
