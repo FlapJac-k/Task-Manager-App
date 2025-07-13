@@ -51,6 +51,7 @@ class RolePermissionSeeder extends Seeder
         $users = [
             'manager@example.com' => 'manager',
             'user@example.com' => 'user',
+            'user2@example.com' => 'user',
         ];
 
         foreach ($users as $email => $roleName) {
