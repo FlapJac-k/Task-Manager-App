@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('task_dependencies', function (Blueprint $table) {
-            $table->id();
             $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
             $table->foreignId('depends_on_id')->constrained('tasks')->onDelete('restrict');
             $table->timestamps();
-            $table->unique(['task_id', 'depends_on_id']);
+            $table->primary(['task_id', 'depends_on_id']);
         });
     }
 
