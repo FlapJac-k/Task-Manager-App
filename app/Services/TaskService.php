@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateTaskDTO;
 use App\DTOs\TaskFilterDTO;
 use App\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
@@ -18,15 +19,18 @@ class TaskService
         return $this->taskRepository->filter($dto);
     }
 
-    public function createTask(array $data): Task
+    public function createTask(CreateTaskDTO $dto): Task
     {
-        $dependencies = $data['depends_on'] ?? [];
-        unset($data['depends_on']);
+        $task = $this->taskRepository->create([
+            'title' => $dto->title,
+            'description' => $dto->description,
+            'assigned_to' => $dto->assigned_to,
+            'due_date' => $dto->due_date,
+            'status' => $dto->status,
+        ]);
 
-        $task = $this->taskRepository->create($data);
-
-        if (! empty($dependencies)) {
-            $this->syncDependencies($task, $dependencies);
+        if (! empty($dto->depends_on)) {
+            $this->syncDependencies($task, $dto->depends_on);
         }
 
         return $task;

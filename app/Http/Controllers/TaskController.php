@@ -33,7 +33,9 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
-        $task = $this->taskService->createTask($request->validated());
+        $dto = $request->toDTO();
+
+        $task = $this->taskService->createTask($dto);
 
         return (new TaskResource($task))->response()->setStatusCode(201);
     }
