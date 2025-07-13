@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\DTOs\TaskFilterDTO;
+use App\Enums\TaskStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class GetTaskRequest extends FormRequest
 {
@@ -23,7 +25,7 @@ class GetTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'nullable|string|in:pending,inprogress,completed,canceled',
+            'status' => ['nullable', new Enum(TaskStatusEnum::class)],
             'due_from' => 'nullable|date',
             'due_to' => 'nullable|date|after_or_equal:due_from',
             'assigned_to' => 'nullable|integer|exists:users,id',

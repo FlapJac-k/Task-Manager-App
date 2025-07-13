@@ -45,8 +45,11 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        // TODO:: Use DTO
-        $updatedTask = $this->taskService->updateTask($task, $request->validated(), $request->user());
+        $dto = $request->toDTO();
+
+        $user = $request->user();
+
+        $updatedTask = $this->taskService->updateTask($task, $dto, $user);
 
         return new TaskResource($updatedTask);
     }

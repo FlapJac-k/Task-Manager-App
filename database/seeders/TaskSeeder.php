@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\TaskStatusEnum;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ class TaskSeeder extends Seeder
             'description' => 'Initialize Git repository, add README, and push to GitHub.',
             'assigned_to' => $userId1,
             'due_date' => Carbon::now()->addDays(3),
-            'status' => 'completed',
+            'status' => TaskStatusEnum::Completed->value,
         ]);
 
         $schemaTask = Task::create([
@@ -30,7 +31,7 @@ class TaskSeeder extends Seeder
             'description' => 'Plan out tables and relationships using an ERD tool.',
             'assigned_to' => $userId1,
             'due_date' => Carbon::now()->addDays(3),
-            'status' => 'canceled',
+            'status' => TaskStatusEnum::Canceled->value,
         ]);
 
         $authTask = Task::create([
@@ -38,7 +39,6 @@ class TaskSeeder extends Seeder
             'description' => 'Use Laravel Sanctum to allow user login/logout via API.',
             'assigned_to' => $userId1,
             'due_date' => Carbon::now()->addDays(4),
-            'status' => 'pending',
 
         ]);
 
@@ -47,7 +47,7 @@ class TaskSeeder extends Seeder
             'description' => 'Test TaskService, AuthService, and other business logic.',
             'assigned_to' => $userId1,
             'due_date' => Carbon::now()->addDays(5),
-            'status' => 'inprogress',
+            'status' => TaskStatusEnum::InProgress->value,
         ]);
 
         $deployTask = Task::create([
@@ -55,7 +55,6 @@ class TaskSeeder extends Seeder
             'description' => 'Push code to staging server and verify basic functionality.',
             'assigned_to' => $userId2,
             'due_date' => Carbon::now()->addDays(5),
-            'status' => 'pending',
         ]);
 
         $authTask->dependencies()->attach([$repoTask->id, $schemaTask->id]);

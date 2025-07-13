@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DTOs\CreateTaskDTO;
 use App\DTOs\TaskFilterDTO;
+use App\DTOs\UpdateTaskDTO;
+use App\Enums\TaskStatusEnum;
 use App\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
 use App\Models\User;
@@ -36,34 +38,40 @@ class TaskService
         return $task;
     }
 
-    public function updateTask(Task $task, array $data, User $user): Task
+    public function updateTask(Task $task, UpdateTaskDTO $dto, User $user): Task
     {
-        $this->validateCompletionRules($task, $data);
+        $this->validateCompletionRules($task, $dto);
 
         if ($user->hasRole('manager')) {
 
-            $dependencies = $data['depends_on'] ?? null;
+            $updateData = [
+                'title' => $dto->title,
+                'description' => $dto->description,
+                'assigned_to' => $dto->assigned_to,
+                'due_date' => $dto->due_date,
+                'status' => $dto->status instanceof TaskStatusEnum ? $dto->status->value : UpdateTaskDTO::UNDEFINED,
+            ];
 
-            unset($data['depends_on']);
+            $updateData = array_filter($updateData, fn ($v) => $v !== null && $v !== UpdateTaskDTO::UNDEFINED);
 
-            $this->taskRepository->update($task, $data);
+            $this->taskRepository->update($task, $updateData);
 
-            if ($dependencies !== null) {
-                $this->syncDependencies($task, $dependencies);
+            if ($dto->depends_on != UpdateTaskDTO::UNDEFINED && ! empty($dto->depends_on)) {
+                $this->syncDependencies($task, $dto->depends_on);
             }
 
             return $task;
         }
 
         if ($user->hasRole('user') && $task->assigned_to === $user->id) {
-            if (! isset($data['status'])) {
+            if (! $dto->status instanceof TaskStatusEnum) {
                 throw ValidationException::withMessages([
                     'status' => ['You can only update the task status.'],
                 ]);
             }
 
             return $this->taskRepository->update($task, [
-                'status' => $data['status'],
+                'status' => $dto->status->value,
             ]);
         }
 
@@ -95,13 +103,11 @@ class TaskService
         $task->dependencies()->sync($dependencies);
     }
 
-    private function validateCompletionRules(Task $task, array $data): void
+    private function validateCompletionRules(Task $task, UpdateTaskDTO $dto): void
     {
-        // TODO:: Use Enum For Task status
         if (
-            isset($data['status']) &&
-            $data['status'] === 'completed' &&
-            $task->dependencies()->where('status', '!=', 'completed')->exists()
+            $dto->status === TaskStatusEnum::Completed &&
+            $task->dependencies()->where('status', '!=', TaskStatusEnum::Completed->value)->exists()
         ) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot complete task until all dependencies are completed.'],

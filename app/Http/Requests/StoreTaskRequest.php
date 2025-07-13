@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\DTOs\CreateTaskDTO;
+use App\Enums\TaskStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -27,7 +29,7 @@ class StoreTaskRequest extends FormRequest
             'description' => 'nullable|string',
             'assigned_to' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date',
-            'status' => 'in:pending,inprogress,completed,canceled',
+            'status' => [new Enum(TaskStatusEnum::class)],
             'depends_on' => 'nullable|array',
             'depends_on.*' => 'exists:tasks,id|distinct',
         ];
