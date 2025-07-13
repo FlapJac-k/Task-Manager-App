@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\TaskFilterDTO;
 use App\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
 use App\Models\User;
@@ -12,16 +13,9 @@ class TaskService
 {
     public function __construct(private readonly TaskRepositoryInterface $taskRepository) {}
 
-    public function getVisibleTasks(User $user): Collection
+    public function getFilteredTasks(TaskFilterDTO $dto): Collection
     {
-        return $user->hasRole('manager')
-            ? $this->taskRepository->getAll()
-            : $this->taskRepository->getByAssignedUser($user->id);
-    }
-
-    public function getTaskWithDependencies(int $taskId): Task
-    {
-        return $this->taskRepository->findWithDependencies($taskId);
+        return $this->taskRepository->filter($dto);
     }
 
     public function createTask(array $data): Task

@@ -2,16 +2,13 @@
 
 namespace App\Interfaces;
 
+use App\DTOs\TaskFilterDTO;
 use App\Models\Task;
 use Illuminate\Support\Collection;
 
 interface TaskRepositoryInterface
 {
-    public function getAll(): Collection;
-
-    public function getByAssignedUser(int $userId): Collection;
-
-    public function findWithDependencies(int $taskId): Task;
+    public function filter(TaskFilterDTO $dto): Collection;
 
     public function create(array $data): Task;
 

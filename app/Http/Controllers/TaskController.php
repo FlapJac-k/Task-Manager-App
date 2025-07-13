@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
-use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -16,11 +16,16 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(GetTaskRequest $request)
     {
+
+        $dto = $request->toDTO();
+
         $user = $request->user();
 
-        return TaskResource::collection($this->taskService->getVisibleTasks($user));
+        $tasks = $this->taskService->getFilteredTasks($dto, $user);
+
+        return TaskResource::collection($tasks);
     }
 
     /**
@@ -31,16 +36,6 @@ class TaskController extends Controller
         $task = $this->taskService->createTask($request->validated());
 
         return (new TaskResource($task))->response()->setStatusCode(201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(int $taskId)
-    {
-        $task = $this->taskService->getTaskWithDependencies($taskId);
-
-        return new TaskResource($task);
     }
 
     /**
